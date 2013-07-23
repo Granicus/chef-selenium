@@ -31,3 +31,11 @@ template 'procfile.init' do
   mode '0755'
 end
 
+
+template 'procfile.monitrc' do
+  path "/etc/monit/conf.d/selenium.conf"
+  owner 'root'
+  group 'root'
+  mode '0644'
+end
+

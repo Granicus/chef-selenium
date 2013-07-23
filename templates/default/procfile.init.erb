@@ -1,68 +1,76 @@
 #!/bin/bash
-### BEGIN INIT INFO
-# Provides:          selenium
-# Required-Start:    $remote_fs $syslog
-# Required-Stop:     $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Start selenium at boot time
-# Description:       Enable service provided by selenium.
-### END INIT INFO
- 
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
- 
-DISPLAY_ID=":99"
-RUN_AS=root
- 
-JAVA_BIN=/usr/bin/java
- 
-SELENIUM_DIR=<%=node['selenium']['server']['installpath']=%>
-SELENIUM_PID_FILE="$SELENIUM_DIR/selenium.pid"
-SELENIUM_JAR_FILE="$SELENIUM_DIR/selenium-server-standalone.jar"
-SELENIUM_LOG_FILE=<%=node['selenium']['server']['logpath']%>
-SELENIUM_DAEMON_OPTS=" -client -jar $SELENIUM_JAR_FILE -log $SELENIUM_LOG_FILE"
- 
-export DISPLAY="$DISPLAY_ID.0"
- 
-set -e
- 
-. /lib/lsb/init-functions
- 
+
+PID_FILE=${PID_FILE:-/var/run/selenium.pid}
+LOG_FILE=${LOG_FILE:-/var/log/selenium.log}
+
+STATUS_RUNNING=0
+STATUS_DEAD_WITH_PID=1
+STATUS_UNKNOWN=4
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+
+function checkpid() {
+    [ -z $1 ] && return 1
+    [ -d /proc/$1 ] && return 0
+    return 1
+}
+
+function start() {
+    echo -n "Starting process $0 ..."
+    if [ -s $PID_FILE ]
+    then
+      read pid < $PID_FILE
+      if checkpid $pid 2>&1; then
+          echo "[FAIL] process with PID ${pid} is running."
+          exit $STATUS_UNKNOWN
+      fi
+    fi
+
+    cd <%= node['selenium']['server']['installpath'] %>
+    "java -jar selenium-server-standalone.jar" >> $LOG_FILE 2>&1 &
+    PID="$!"
+
+    if [ $? -eq 0 ]; then
+      echo $PID > $PID_FILE
+    else
+      exit $STATUS_UNKNOWN
+    fi
+}
+
+function stop() {
+    echo -n "Terminating process $0 ..."
+    if [ -s $PID_FILE ]
+    then
+        read pid < $PID_FILE
+        if checkpid $pid 2>&1; then
+            kill -SIGTERM $pid
+            if [ $? -eq 0 ]; then
+                echo $! > $PID_FILE
+                echo "[OK]"
+                rm -rf $PID_FILE
+            else
+                echo "[FAIL]"
+                exit $STATUS_UNKNOWN
+            fi
+        else
+            echo "[FAIL] process with PID ${pid} does not exist"
+            exit $STATUS_DEAD_WITH_PID
+        fi
+    else
+        echo "[FAIL] pid file $PID_FILE is not found"
+        exit $STATUS_UNKOWN
+    fi
+}
+
 case "$1" in
     start)
- 
-        if status_of_proc -p $SELENIUM_PID_FILE "$SELENIUM_JAR_FILE" $SELENIUM_JAR_FILE > /dev/null; then
-            log_progress_msg "Service already running"
-        else
-            log_daemon_msg "Starting Selenium server"
-            log_progress_msg "selenium"
-            start-stop-daemon -c $RUN_AS --start --quiet --background --pidfile $SELENIUM_PID_FILE --make-pidfile --exec $JAVA_BIN -- $SELENIUM_DAEMON_OPTS
-        fi
+        start
         ;;
- 
     stop)
-        if status_of_proc -p $SELENIUM_PID_FILE "$SELENIUM_JAR_FILE" $SELENIUM_JAR_FILE > /dev/null; then
-            log_daemon_msg "Stopping Selenium server"
-            log_progress_msg "selenium"
-            start-stop-daemon --stop --pidfile $SELENIUM_PID_FILE 
-        else
-            log_progress_msg "Service not running"
-        fi
+        stop
         ;;
- 
-    restart|force-reload)
-        $0 stop
-        sleep 1
-        $0 start
-	;;
- 
-	status)
-        status_of_proc -p $SELENIUM_PID_FILE "$SELENIUM_JAR_FILE" $SELENIUM_JAR_FILE && exit 0 || exit $?
-    ;;
- 
     *)
-      	N=/etc/init.d/selenium
-        echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
-        exit 1
-        ;;
+        echo "Usage: $0 {start|stop}"
+        exit 0
 esac
+
+exit $STATUS_RUNNING
