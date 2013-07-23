@@ -12,7 +12,6 @@ execute "apt-get update > /dev/null" do
   action :run
 end
 
-package "firefox" do
-  options "--force-yes"
+rpm_package "firefox" do
   action :install
 end
