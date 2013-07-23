@@ -1,4 +1,4 @@
-package 'openjdk-7-jre-headless'
+package 'openjdk-6-jre-headless'
 package 'unzip'
 
 user node['selenium']['server']['user'] do
