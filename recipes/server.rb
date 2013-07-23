@@ -8,7 +8,7 @@ remote_file File.join(node['selenium']['server']['installpath'], 'selenium-serve
   mode 0644
 end
 
-directory "/var/run/#{@new_resource.name}" do
+directory "/var/run/selenium" do
   owner 'root'
   group 'root'
   mode '0755'
