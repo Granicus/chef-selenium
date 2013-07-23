@@ -1,0 +1,5 @@
+check process selenium with pidfile /var/run/selenium.pid
+start program = "/etc/puppet/utils/selenium/startSeleniumServer.sh"
+stop program = "/bin/kill `cat /var/run/selenium-server.pid`"
+if failed port 4444 then restart
+if 5 restarts within 5 cycles then timeout
