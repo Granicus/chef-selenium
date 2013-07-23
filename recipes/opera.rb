@@ -17,10 +17,6 @@ if "#{node['selenium']['opera']['version']}" != "last"
   end
 end
 
-execute "apt-get update > /dev/null" do
-  action :run
-end
-
 package "opera" do
   options "--force-yes"
   action :install

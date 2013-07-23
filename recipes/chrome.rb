@@ -17,9 +17,6 @@ if "#{node['selenium']['chrome']['version']}" != "last"
   end
 end
 
-execute "apt-get update > /dev/null" do
-  action :run
-end
 
 package "google-chrome-stable" do
   options "--force-yes"
