@@ -9,11 +9,6 @@
 # Description:       Enable service provided by selenium.
 ### END INIT INFO
  
-  <% node[@name.to_sym].each do |k, v| %>
-  export <%= k.to_s.upcase %>='<%= v.to_s %>'
-  <% end %>
- 
- 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
  
 DISPLAY_ID=":99"
