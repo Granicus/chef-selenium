@@ -13,6 +13,5 @@ execute "apt-get update > /dev/null" do
 end
 
 package "firefox" do
-  options "--force-yes"
   action :install
 end
