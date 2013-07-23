@@ -8,7 +8,7 @@ remote_file File.join(node['selenium']['server']['installpath'], 'selenium-serve
   mode 0644
 end
 
-directory "/var/run/#{new_resource.name}" do
+directory "/var/run/#{@new_resource.name}" do
   owner 'root'
   group 'root'
   mode '0755'
@@ -16,7 +16,7 @@ directory "/var/run/#{new_resource.name}" do
   action :create
 end
 
-directory "/var/log/#{new_resource.name}" do
+directory "/var/log/#{@new_resource.name}" do
   owner 'root'
   group 'root'
   mode '0755'
@@ -25,14 +25,14 @@ directory "/var/log/#{new_resource.name}" do
 end
 
 template 'procfile.init' do
-  path "/etc/init.d/#{new_resource.name}-#{type}"
+  path "/etc/init.d/#{@new_resource.name}-#{type}"
   owner 'root'
   group 'root'
   mode '0755'
   variables ({
-    :name => new_resource.name,
+    :name => @new_resource.name,
     :type => type,
-    :current_path => ::File.join(new_resource.application.path, 'current'),
+    :current_path => ::File.join(@new_resource.application.path, 'current'),
     :command => pf[type.to_s]
   })
 end
