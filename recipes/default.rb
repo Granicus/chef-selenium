@@ -1,6 +1,3 @@
-package 'openjdk-6-jre-headless'
-package 'unzip'
-
 user node['selenium']['server']['user'] do
   home "/home/selenium"
   supports :manage_home => true
