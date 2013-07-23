@@ -8,9 +8,6 @@ if "#{node['selenium']['firefox']['version']}" != "last"
   end
 end
 
-execute "apt-get update > /dev/null" do
-  action :run
-end
 
 rpm_package "firefox" do
   action :install
